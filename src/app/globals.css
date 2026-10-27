@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/*
+ * VYRO design tokens, taken from ui_inspo.png: near-black ground, layered dark
+ * surfaces, electric lime accent, red "LIVE" badges. Text colours meet WCAG AA
+ * on every surface they are used on.
+ */
+@theme {
+  --color-bg: #050505;
+  --color-surface: #111113;
+  --color-surface-2: #1a1a1d;
+  --color-surface-3: #232327;
+  --color-line: #26262a;
+  --color-fg: #f4f4f5;
+  --color-muted: #a1a1a8;
+  --color-subtle: #85858c;
+  --color-lime: #d4f54a;
+  --color-lime-hover: #e2ff6b;
+  --color-on-lime: #0a0a0a;
+  --color-live: #e0222a;
+  --color-danger: #ff6b6b;
+  --color-success: #7ee2a8;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Desktop breakpoint between Tailwind's xl (1280) and 2xl (1536). */
+  --breakpoint-desk: 90rem;
+
+  --radius-card: 1rem;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-lime);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

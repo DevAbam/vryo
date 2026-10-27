@@ -1,0 +1,3 @@
+-- Development seed. Synthetic data only; never production data.
+-- Users are created through the Auth admin API in tests rather than seeded here,
+-- so the signup trigger runs exactly as it does in production.
