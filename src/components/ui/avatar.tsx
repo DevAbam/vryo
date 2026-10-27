@@ -1,4 +1,6 @@
 import { cn } from "@/lib/cn";
+import { publicEnv } from "@/lib/env/public";
+import { imageUrl } from "@/lib/media/image-url";
 
 // Muted backgrounds behind white initials, like the inspo's avatar chips.
 // Every pairing keeps white text above 4.5:1.
@@ -17,19 +19,44 @@ export function initials(name: string) {
 }
 
 const sizes = { sm: "size-8 text-xs", md: "size-10 text-sm", lg: "size-20 text-2xl" } as const;
+const pixels = { sm: 32, md: 40, lg: 80 } as const;
 
-/** Initials avatar. Uploaded avatars arrive with the media phase. */
+/** Profile photo served from ImageKit, falling back to coloured initials. */
 export function Avatar({
   name,
   seed,
+  path,
   size = "md",
   className,
 }: {
   name: string;
   seed: string;
+  path?: string | null;
   size?: keyof typeof sizes;
   className?: string;
 }) {
+  const endpoint = publicEnv().NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
+  const px = pixels[size];
+  const src = path && endpoint ? imageUrl(endpoint, path, { width: px, height: px }) : null;
+  const src2x =
+    path && endpoint ? imageUrl(endpoint, path, { width: px * 2, height: px * 2 }) : null;
+
+  if (src && src2x) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- ImageKit resizes on its CDN; next/image would optimise twice.
+      <img
+        src={src}
+        srcSet={`${src} 1x, ${src2x} 2x`}
+        alt=""
+        width={px}
+        height={px}
+        loading="lazy"
+        decoding="async"
+        className={cn("shrink-0 rounded-full bg-surface-2 object-cover", sizes[size], className)}
+      />
+    );
+  }
+
   return (
     <span
       aria-hidden="true"

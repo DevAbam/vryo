@@ -16,13 +16,13 @@ describe("safeNextPath", () => {
     ["protocol-relative", "//evil.example/feed"],
     ["backslash trick", "/\evil.example"],
     ["javascript scheme", "javascript:alert(1)"],
-    ["unknown path", "/admin"],
+    ["unknown path", "/internal"],
     ["prefix lookalike", "/feedback"],
     ["control characters", "/feed\n"],
     ["empty", ""],
     ["non-string", 42],
     ["null", null],
-    ["path traversal out of allowlist", "/feed/../admin"],
+    ["path traversal out of allowlist", "/feed/../internal"],
   ])("rejects %s", (_label, input) => {
     expect(safeNextPath(input)).toBe("/feed");
   });

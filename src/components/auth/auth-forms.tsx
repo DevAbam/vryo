@@ -15,7 +15,7 @@ import {
 } from "@/server/actions/auth";
 import { completeOnboardingAction } from "@/server/actions/profile";
 
-const PASSWORD_HINT = "At least 10 characters with upper and lower case letters and a number.";
+const PASSWORD_HINT = "At least 6 characters with upper and lower case letters and a number.";
 
 export function LoginForm() {
   const [state, formAction] = useActionState(signInAction, initialFormState);

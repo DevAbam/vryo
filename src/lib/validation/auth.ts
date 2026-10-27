@@ -7,10 +7,10 @@ export const emailSchema = z
   .max(254, "Email is too long.")
   .pipe(z.email("Enter a valid email address."));
 
-// Mirrors supabase/config.toml: minimum 10, lower + upper + digit.
+// Mirrors supabase/config.toml: minimum 6, lower + upper + digit.
 export const newPasswordSchema = z
   .string()
-  .min(10, "Use at least 10 characters.")
+  .min(6, "Use at least 6 characters.")
   .max(72, "Use at most 72 characters.")
   .regex(/[a-z]/, "Include a lowercase letter.")
   .regex(/[A-Z]/, "Include an uppercase letter.")

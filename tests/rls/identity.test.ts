@@ -139,6 +139,7 @@ describe.skipIf(!dbConfigured)("identity RLS", () => {
         { status: "active" as const },
         { id: b.id },
         { created_at: "2000-01-01T00:00:00Z" },
+        { verified_at: "2026-01-01T00:00:00Z" },
       ]) {
         const { error } = await a.client.from("profiles").update(patch).eq("id", a.id);
         expect(error?.code, JSON.stringify(patch)).toBe("42501");
@@ -180,6 +181,64 @@ describe.skipIf(!dbConfigured)("identity RLS", () => {
         .select("favourite_sports");
       expect(error).toBeNull();
       expect(data).toEqual([{ favourite_sports: ["football", "basketball"] }]);
+    });
+  });
+
+  describe("avatar paths", () => {
+    it("A can point their avatar at a file in their own folder", async () => {
+      const path = `/avatars/${a.id}/avatar_x1Y2.webp`;
+      const { error } = await a.client
+        .from("profiles")
+        .update({ avatar_path: path })
+        .eq("id", a.id);
+      expect(error).toBeNull();
+      await a.client.from("profiles").update({ avatar_path: null }).eq("id", a.id);
+    });
+
+    it("avatar_file_id must look like an ImageKit id", async () => {
+      const ok = await a.client
+        .from("profiles")
+        .update({ avatar_file_id: "65f1a2b3c4d5e6f7a8b9c0d1" })
+        .eq("id", a.id);
+      expect(ok.error).toBeNull();
+      const bad = await a.client
+        .from("profiles")
+        .update({ avatar_file_id: "../../etc" })
+        .eq("id", a.id);
+      expect(bad.error?.code).toBe("23514");
+      await a.client.from("profiles").update({ avatar_file_id: null }).eq("id", a.id);
+    });
+
+    it.each([
+      ["another user's folder", (t: { b: string }) => `/avatars/${t.b}/avatar.webp`],
+      ["an external URL", () => "https://evil.example/a.png"],
+      ["a path traversal", (t: { a: string }) => `/avatars/${t.a}/../x.webp`],
+    ])("A cannot point their avatar at %s", async (_label, build) => {
+      const path = (build as (t: { a: string; b: string }) => string)({ a: a.id, b: b.id });
+      const { error } = await a.client
+        .from("profiles")
+        .update({ avatar_path: path })
+        .eq("id", a.id);
+      expect(error?.code).toBe("23514");
+    });
+  });
+
+  describe("verification", () => {
+    it("is visible to everyone once staff set it", async () => {
+      await serviceClient()
+        .from("profiles")
+        .update({ verified_at: new Date().toISOString() })
+        .eq("id", b.id);
+      const { data } = await anonClient().from("profiles").select("verified_at").eq("id", b.id);
+      expect(data?.[0]?.verified_at).not.toBeNull();
+    });
+
+    it("cannot be removed by the user either", async () => {
+      const { error } = await b.client
+        .from("profiles")
+        .update({ verified_at: null })
+        .eq("id", b.id);
+      expect(error?.code).toBe("42501");
     });
   });
 

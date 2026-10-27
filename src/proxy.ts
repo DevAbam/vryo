@@ -13,6 +13,7 @@ const PROTECTED_PREFIXES = [
   "/messages",
   "/profile",
   "/settings",
+  "/admin",
   "/onboarding",
   "/update-password",
 ];

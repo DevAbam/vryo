@@ -42,7 +42,7 @@ test.describe("public pages", () => {
     await page.getByLabel("Password").fill("short");
     await page.getByRole("button", { name: "Create account" }).click();
     await expect(page.getByText("Enter a valid email address.")).toBeVisible();
-    await expect(page.getByText("Use at least 10 characters.")).toBeVisible();
+    await expect(page.getByText("Use at least 6 characters.")).toBeVisible();
     await expect(page.getByLabel("Email")).toHaveAttribute("aria-invalid", "true");
     await expectAccessible(page);
   });

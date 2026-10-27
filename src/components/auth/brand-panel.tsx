@@ -33,7 +33,7 @@ export function BrandPanel() {
         className="pointer-events-none absolute -top-40 -right-40 size-[28rem] rounded-full bg-lime/15 blur-3xl"
       />
       <div className="relative flex items-center gap-3">
-        <LogoMark className="size-9" />
+        <LogoMark className="h-9" />
         <span className="text-2xl font-black tracking-[0.12em]">VYRO</span>
       </div>
       <PitchArt className="relative w-full text-lime/40" />

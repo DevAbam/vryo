@@ -56,7 +56,11 @@ export async function createTestUser(label: string): Promise<TestUser> {
   return { id: data.user.id, email, client };
 }
 
-export async function deleteTestUsers(users: TestUser[]) {
+export async function deleteTestUsers(users: Array<TestUser | undefined>) {
   const admin = serviceClient();
-  await Promise.all(users.map((user) => admin.auth.admin.deleteUser(user.id)));
+  await Promise.all(
+    users
+      .filter((user): user is TestUser => Boolean(user))
+      .map((user) => admin.auth.admin.deleteUser(user.id)),
+  );
 }

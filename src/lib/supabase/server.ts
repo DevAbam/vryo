@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { publicEnv } from "@/lib/env/public";
 import type { Database } from "@/types/database";
 
@@ -9,6 +10,10 @@ import type { Database } from "@/types/database";
  * Create a new one for every request; never share across requests.
  */
 export async function createSupabaseServerClient() {
+  // Supabase checks token expiry with Date.now(), which Cache Components
+  // forbids during prerendering (including per-session prefetches). Defer all
+  // session work to request time; prefetches carry the static shell instead.
+  await connection();
   const cookieStore = await cookies();
   const env = publicEnv();
 

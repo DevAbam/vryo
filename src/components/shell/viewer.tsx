@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/primitives";
+import { VerifiedBadge } from "@/components/ui/verified-badge";
 import { signOutAction } from "@/server/actions/auth";
 import { requireViewer } from "@/server/services/profile";
 
@@ -10,7 +11,7 @@ export async function ViewerAvatarLink() {
   const { profile } = await requireViewer();
   return (
     <Link href={`/profile/${profile.handle}`} className="rounded-full" aria-label="Your profile">
-      <Avatar name={profile.display_name} seed={profile.id} size="sm" />
+      <Avatar name={profile.display_name} seed={profile.id} path={profile.avatar_path} size="sm" />
     </Link>
   );
 }
@@ -25,9 +26,12 @@ export async function ViewerCard() {
         className="flex min-w-0 flex-1 items-center gap-3 rounded-full"
         aria-label="Your profile"
       >
-        <Avatar name={profile.display_name} seed={profile.id} />
+        <Avatar name={profile.display_name} seed={profile.id} path={profile.avatar_path} />
         <span className="hidden min-w-0 flex-col lg:flex">
-          <span className="truncate text-sm font-bold text-fg">{profile.display_name}</span>
+          <span className="flex min-w-0 items-center gap-1 text-sm font-bold text-fg">
+            <span className="truncate">{profile.display_name}</span>
+            {profile.verified_at && <VerifiedBadge />}
+          </span>
           <span className="truncate text-xs text-muted">@{profile.handle}</span>
         </span>
       </Link>

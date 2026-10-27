@@ -9,6 +9,10 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const connectSrc = ["'self'", supabaseUrl, supabaseUrl.replace(/^http/, "ws")]
   .filter(Boolean)
   .join(" ");
+// ImageKit CDN delivers user images (avatars, post media).
+const imagekitOrigin = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT
+  ? new URL(process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT).origin
+  : "";
 
 // Static CSP without nonces so pages can still be prerendered with Cache
 // Components. 'unsafe-inline' for scripts is a documented residual risk
@@ -17,7 +21,7 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' blob: data: ${supabaseUrl}`.trim(),
+  `img-src 'self' blob: data: ${supabaseUrl} ${imagekitOrigin}`.trim(),
   "font-src 'self'",
   `connect-src ${connectSrc}`,
   "media-src 'self' blob:",
@@ -49,6 +53,13 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  experimental: {
+    serverActions: {
+      // Avatar uploads go through a server action (validated, then sent to
+      // ImageKit). MAX_IMAGE_BYTES is 4 MB; this leaves room for form overhead.
+      bodySizeLimit: "5mb",
+    },
+  },
   // A stray lockfile in the home directory confuses root detection; pin it.
   outputFileTracingRoot: process.cwd(),
   turbopack: {

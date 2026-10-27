@@ -1,4 +1,6 @@
-/** Joins truthy class names. */
+import { twMerge } from "tailwind-merge";
+
+/** Joins class names; later Tailwind classes override conflicting earlier ones. */
 export function cn(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
+  return twMerge(classes.filter(Boolean).join(" "));
 }

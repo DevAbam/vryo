@@ -18,9 +18,10 @@ describe("handleSchema", () => {
 describe("newPasswordSchema", () => {
   it("accepts a strong password", () => {
     expect(newPasswordSchema.safeParse("Touchline2026").success).toBe(true);
+    expect(newPasswordSchema.safeParse("Abc123").success).toBe(true);
   });
 
-  it.each(["short1A", "alllowercase123", "ALLUPPERCASE123", "NoDigitsHereAtAll"])(
+  it.each(["Ab1cd", "alllowercase123", "ALLUPPERCASE123", "NoDigitsHereAtAll"])(
     "rejects %s",
     (input) => {
       expect(newPasswordSchema.safeParse(input).success).toBe(false);

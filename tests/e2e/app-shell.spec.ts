@@ -1,20 +1,21 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
-import { createTestUser, dbConfigured, deleteTestUsers, type TestUser } from "../rls/helpers";
+import { expect, test } from "@playwright/test";
+import {
+  createTestUser,
+  dbConfigured,
+  deleteTestUsers,
+  serviceClient,
+  type TestUser,
+} from "../rls/helpers";
+import { signIn } from "./support";
 
 // Needs the local Supabase stack (npm run db:start) and the app pointed at it.
 test.skip(!dbConfigured, "Supabase test environment not configured");
 
-const PASSWORD = "Test-Password-2026";
-
-async function signIn(page: Page, user: TestUser) {
-  await page.goto("/login");
-  await page.getByLabel("Email").fill(user.email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-}
-
 test.describe("signed-in app shell", () => {
+  // Many round trips to a hosted Supabase project; the default 30s is too tight.
+  test.describe.configure({ timeout: 90_000 });
+
   let user: TestUser;
 
   test.beforeEach(async () => {
@@ -26,7 +27,7 @@ test.describe("signed-in app shell", () => {
   });
 
   test("onboarding, navigation, profile edit and sign out", async ({ page }, testInfo) => {
-    await signIn(page, user);
+    await signIn(page, user, /\/onboarding$/);
 
     await expect(page).toHaveURL(/\/onboarding$/);
     const handle = `e2e_${Date.now().toString(36)}`.slice(0, 20);
@@ -68,9 +69,19 @@ test.describe("signed-in app shell", () => {
 
     await page.goto(`/profile/${handle}`);
     await expect(page.getByText("Here for the tactics.")).toBeVisible();
+    const badge = page.getByRole("main").getByRole("img", { name: "Verified account" });
+    await expect(badge).toHaveCount(0);
+    await serviceClient()
+      .from("profiles")
+      .update({ verified_at: new Date().toISOString() })
+      .eq("id", user.id);
+    await page.reload();
+    await expect(badge).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath("profile-verified.png") });
 
     await page.goto("/settings");
-    await page.getByRole("button", { name: "Sign out", exact: true }).click();
+    // The sidebar also has a sign-out button from `lg`; use the settings one.
+    await page.getByRole("main").getByRole("button", { name: "Sign out", exact: true }).click();
     await expect(page).toHaveURL(/\/login$/);
     await page.goto("/feed");
     await expect(page).toHaveURL(/\/login\?next=%2Ffeed$/);

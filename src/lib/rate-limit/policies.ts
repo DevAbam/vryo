@@ -6,10 +6,13 @@ export const RATE_LIMITS = {
   loginByIp: { limit: 20, windowSeconds: 15 * 60 },
   loginByEmail: { limit: 8, windowSeconds: 15 * 60 },
   signupByIp: { limit: 5, windowSeconds: 60 * 60 },
+  avatarUploadByUser: { limit: 10, windowSeconds: 60 * 60 },
   passwordResetByIp: { limit: 10, windowSeconds: 60 * 60 },
   passwordResetByEmail: { limit: 3, windowSeconds: 60 * 60 },
   profileUpdateByUser: { limit: 30, windowSeconds: 60 * 60 },
   globalSignOutByUser: { limit: 5, windowSeconds: 60 * 60 },
+  verificationSubmitByUser: { limit: 3, windowSeconds: 24 * 60 * 60 },
+  adminActionByUser: { limit: 300, windowSeconds: 60 * 60 },
 } as const satisfies Record<string, { limit: number; windowSeconds: number }>;
 
 export type RateLimitPolicy = keyof typeof RATE_LIMITS;

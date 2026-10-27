@@ -24,6 +24,18 @@ Not yet configured. Planned: server-issued tokens with short TTL (≤ 10 min), `
 
 ## Supabase
 
-- Local: `supabase/config.toml`. Email confirmations on, minimum password length 10 with mixed case and digits, TOTP MFA enabled, refresh token rotation on.
+- Local: `supabase/config.toml`. Email confirmations on, minimum password length 6 with mixed case and digits, TOTP MFA enabled, refresh token rotation on.
 - Hosted projects (staging/production) must mirror these Auth settings. They are not applied automatically from `config.toml`.
 - Prefer asymmetric JWT signing keys so `getClaims()` verifies locally.
+
+## Google and Apple sign-in
+
+Deferred by product decision (2026-10-28). The callback route already handles OAuth `code` exchange and sends new users to onboarding, and the signup trigger already reads `full_name`/`name`, so adding providers later is mostly UI plus dashboard configuration.
+
+## ImageKit
+
+See [ADR 0005](../decisions/0005-imagekit-media.md). Setup:
+
+1. ImageKit dashboard → Developer options: copy the **URL endpoint** (`NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT`) and the **private key** (`IMAGEKIT_PRIVATE_KEY`, server-only). The public key is not needed (uploads are server-side).
+2. Use separate ImageKit accounts (or at least separate keys) for dev and production.
+3. The CSP `img-src` picks up the endpoint origin automatically at build time.

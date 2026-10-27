@@ -72,21 +72,30 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
   });
   if (!parsed.success) return { status: "error", fieldErrors: fieldErrors(parsed.error) };
 
+  let needsOnboarding = false;
   try {
     await enforceRateLimit("loginByIp", await getClientIp());
     await enforceRateLimit("loginByEmail", parsed.data.email);
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
     if (error) {
       return {
         status: "error",
         message: "Incorrect email or password, or your email is not confirmed yet.",
       };
     }
+    // Send users without a handle straight to onboarding rather than letting
+    // the app shell render and redirect mid-stream.
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("handle")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    needsOnboarding = !profile?.handle;
   } catch (error) {
     return failure(error, requestId, "auth.login");
   }
-  redirect(safeNextPath(formData.get("next")));
+  redirect(needsOnboarding ? "/onboarding" : safeNextPath(formData.get("next")));
 }
 
 export async function signOutAction(): Promise<void> {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Settings } from "lucide-react";
+import { AdminNavLink } from "@/components/shell/admin-nav-link";
 import { BottomNav, SectionTabs, SidebarNav } from "@/components/shell/nav-links";
 import { RightRail } from "@/components/shell/right-rail";
 import { ViewerAvatarLink, ViewerCard, ViewerCardSkeleton } from "@/components/shell/viewer";
@@ -34,6 +35,9 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           </div>
           <nav aria-label="Primary" className="flex-1">
             <SidebarNav />
+            <Suspense fallback={null}>
+              <AdminNavLink />
+            </Suspense>
           </nav>
           <Suspense fallback={<ViewerCardSkeleton />}>
             <ViewerCard />

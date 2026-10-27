@@ -5,7 +5,15 @@ import type { Database } from "@/types/database";
 
 export type Profile = Pick<
   Database["public"]["Tables"]["profiles"]["Row"],
-  "id" | "handle" | "display_name" | "bio" | "avatar_path" | "status" | "created_at"
+  | "id"
+  | "handle"
+  | "display_name"
+  | "bio"
+  | "avatar_path"
+  | "avatar_file_id"
+  | "status"
+  | "verified_at"
+  | "created_at"
 >;
 
 export type Preferences = Pick<
@@ -13,7 +21,8 @@ export type Preferences = Pick<
   "favourite_sports" | "locale" | "timezone"
 >;
 
-const PROFILE_COLUMNS = "id, handle, display_name, bio, avatar_path, status, created_at";
+const PROFILE_COLUMNS =
+  "id, handle, display_name, bio, avatar_path, avatar_file_id, status, verified_at, created_at";
 
 /** Reads go through the user-scoped client, so RLS decides visibility. */
 export const findProfileById = cache(async (id: string): Promise<Profile | null> => {
@@ -49,7 +58,13 @@ export async function findOwnPreferences(userId: string): Promise<Preferences | 
   return data;
 }
 
-export type ProfilePatch = { handle?: string; display_name?: string; bio?: string };
+export type ProfilePatch = {
+  handle?: string;
+  display_name?: string;
+  bio?: string;
+  avatar_path?: string | null;
+  avatar_file_id?: string | null;
+};
 
 /** Returns "handle_taken" on unique violation so the UI can show a field error. */
 export async function updateOwnProfile(

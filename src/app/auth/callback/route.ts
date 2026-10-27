@@ -17,26 +17,39 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient();
   let failedCode: string | undefined;
+  let userId: string | undefined;
 
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     failedCode = error ? (error.code ?? "exchange_failed") : undefined;
+    userId = data.user?.id;
   } else if (tokenHash && type && OTP_TYPES.has(type)) {
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
       type: type as EmailOtpType,
     });
     failedCode = error ? (error.code ?? "verify_failed") : undefined;
+    userId = data.user?.id;
   } else {
-    failedCode = "missing_params";
+    failedCode = searchParams.get("error_code") ?? "missing_params";
   }
 
-  if (failedCode) {
+  if (failedCode || !userId) {
     logger.warn("auth.callback_failed", {
       requestId: request.headers.get(REQUEST_ID_HEADER),
-      code: failedCode,
+      code: failedCode ?? "no_user",
     });
     return NextResponse.redirect(new URL("/login?error=link", origin));
+  }
+
+  // Password recovery goes straight to its form; everyone else needs a handle first.
+  if (next !== "/update-password") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("handle")
+      .eq("id", userId)
+      .maybeSingle();
+    if (!profile?.handle) return NextResponse.redirect(new URL("/onboarding", origin));
   }
   return NextResponse.redirect(new URL(next, origin));
 }

@@ -8,6 +8,7 @@ const ALLOWED_PREFIXES = [
   "/messages",
   "/profile",
   "/settings",
+  "/admin",
   "/onboarding",
   "/update-password",
 ];

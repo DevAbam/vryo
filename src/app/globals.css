@@ -14,8 +14,8 @@
   --color-fg: #f4f4f5;
   --color-muted: #a1a1a8;
   --color-subtle: #85858c;
-  --color-lime: #d4f54a;
-  --color-lime-hover: #e2ff6b;
+  --color-lime: #adff2f; /* brand mark colour */
+  --color-lime-hover: #c4ff66;
   --color-on-lime: #0a0a0a;
   --color-live: #e0222a;
   --color-danger: #ff6b6b;
